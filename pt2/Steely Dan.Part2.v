@@ -189,13 +189,20 @@ module MULT(inputA,inputB,product);
 
 endmodule
 
-module DIV(inputA,inputB,quotient);
+module DIV(inputA,inputB,quotient,dbz);
 	input [15:0] inputA,inputB;
 	output [31:0] quotient;
-	reg [31:0] quo;
+	output dbz;
+	reg dbz;
+	reg [31:0] quotient;
 
-	assign quotient = inputA/inputB;
-	//assign quotient = quo;
+	always @(*) begin
+		if (inputB == 0) 
+			dbz = 1;
+		else 
+			quotient = inputA/inputB;
+			dbz = 0;
+	end
 
 endmodule
 
@@ -252,12 +259,12 @@ input [15:0]inputA;
 input [15:0]inputB;
 input [3:0]command;
 output [31:0]result;
-output error;
+output [1:0]error;
 wire [15:0]inputA;
 wire [15:0]inputB;
 wire [3:0]command;
 reg [31:0]result;
-reg error;
+reg [1:0]error;
 
 //Local Variables
 //Full Adder
@@ -271,17 +278,18 @@ wire [31:0] product;
 
 //Divider
 wire [31:0] quotient;
+wire dbzD;
 
 //Multiplexer
 wire [15:0][31:0] channels;
 wire [15:0] onehotMux;
 wire [31:0] b;
 
-DEC Dec(command,onehotMux);
+DEC dec(command,onehotMux);
 ADD_SUB add_sub(inputA,inputB,mode,sum,carry,overflow);
 MUX mux(channels,onehotMux,b);
 MULT mult(inputA,inputB,product);
-DIV div(inputA, inputB, quotient);
+DIV div(inputA, inputB, quotient, dbzD);
 
 
 
@@ -306,7 +314,7 @@ always @(*)
 begin
 	mode=command[1];
 	result=b;
-	error=overflow;
+	error = {dbzD,overflow};
 end
 
 endmodule
@@ -318,7 +326,7 @@ module TestBench();
   reg [15:0] inputB;
   reg [3:0] command;
   wire [31:0] result;
-  wire error;
+  wire [1:0]error;
   BreadBoard ALU(inputA,inputB,command,result,error);
   
   initial begin
