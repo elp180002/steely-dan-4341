@@ -297,7 +297,7 @@ assign channels[ 0]=0;//GROUND=0
 assign channels[ 1]=sum;//Addition
 assign channels[ 2]=sum;//Subtraction
 assign channels[ 3]=product;//Multiplication
-assign channels[ 4]=quotient;//div;//Division
+assign channels[ 4]=quotient;//Division
 assign channels[ 5]=0;//mod;//Modulo
 assign channels[ 6]=0;//GROUND=0
 assign channels[ 7]=0;//GROUND=0
@@ -312,7 +312,11 @@ assign channels[15]=0;//GROUND=0
 
 always @(*)  
 begin
-	mode=command[1];
+	if (command == 4'b0001) begin
+		mode = 0;
+	end else begin
+		mode = 1;
+	end
 	result=b;
 	error = {dbzD,overflow};
 end
@@ -353,10 +357,10 @@ module TestBench();
 	$display("[Input A:%6d, Input B:%6d][Div:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 	
 	assign inputA  = 16'b0111110100000000;
-	assign inputB  = 16'b0011111010000001;
+	assign inputB  = 16'b0010000000000001;
 	assign command =  1;
-
 	#10;
+
 	$display("[Input A:%6d, Input B:%6d][Add:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
   
 	assign command = 2;
