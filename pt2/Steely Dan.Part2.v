@@ -189,6 +189,16 @@ module MULT(inputA,inputB,product);
 
 endmodule
 
+module DIV(inputA,inputB,quotient);
+	input [15:0] inputA,inputB;
+	output [31:0] quotient;
+	reg [31:0] quo;
+
+	assign quotient = inputA/inputB;
+	//assign quotient = quo;
+
+endmodule
+
 module DEC(binary,onehot);
 	input [3:0] binary;
 	output [15:0]onehot;
@@ -259,15 +269,19 @@ wire overflow;
 //Multiplier
 wire [31:0] product;
 
+//Divider
+wire [31:0] quotient;
+
 //Multiplexer
 wire [15:0][31:0] channels;
 wire [15:0] onehotMux;
 wire [31:0] b;
 
-DEC DecAlpha(command,onehotMux);
-ADD_SUB nept(inputA,inputB,mode,sum,carry,overflow);
-MUX satu(channels,onehotMux,b);
-MULT uran(inputA,inputB,product);
+DEC Dec(command,onehotMux);
+ADD_SUB add_sub(inputA,inputB,mode,sum,carry,overflow);
+MUX mux(channels,onehotMux,b);
+MULT mult(inputA,inputB,product);
+DIV div(inputA, inputB, quotient);
 
 
 
@@ -275,7 +289,7 @@ assign channels[ 0]=0;//GROUND=0
 assign channels[ 1]=sum;//Addition
 assign channels[ 2]=sum;//Subtraction
 assign channels[ 3]=product;//Multiplication
-assign channels[ 4]=0;//div;//Division
+assign channels[ 4]=quotient;//div;//Division
 assign channels[ 5]=0;//mod;//Modulo
 assign channels[ 6]=0;//GROUND=0
 assign channels[ 7]=0;//GROUND=0
@@ -324,6 +338,11 @@ module TestBench();
 	#10;
 
 	$display("[Input A:%6d, Input B:%6d][Mul:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
+
+	assign command = 4;
+	#10;
+
+	$display("[Input A:%6d, Input B:%6d][Div:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 	
 	assign inputA  = 16'b0111110100000000;
 	assign inputB  = 16'b0011111010000001;
@@ -341,6 +360,11 @@ module TestBench();
 	#10;
 
 	$display("[Input A:%6d, Input B:%6d][Mul:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
+
+	assign command = 4;
+	#10;
+
+	$display("[Input A:%6d, Input B:%6d][Div:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 
 	#60; 
 	$finish;
