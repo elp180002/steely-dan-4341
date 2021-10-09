@@ -341,7 +341,7 @@ module TestBench();
   
   initial begin
     assign inputA  = 16'b0000000011111001;
-	assign inputB  = 16'b0000000000000000;//16'b0000000001000101;
+	assign inputB  = 16'b0000000001000101;
 	assign command =  1;
 
 	#10;
