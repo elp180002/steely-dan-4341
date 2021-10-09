@@ -189,36 +189,36 @@ module MULT(inputA,inputB,product);
 
 endmodule
 
-module DIV(inputA,inputB,quotient,dbz);
+module DIV(inputA,inputB,quotient,dbzD);
 	input [15:0] inputA,inputB;
 	output [31:0] quotient;
-	output dbz;
-	reg dbz;
+	output dbzD;
+	reg dbzD;
 	reg [31:0] quotient;
 
 	always @(*) begin
 		quotient = inputA/inputB;
 		if (inputB) 
-			dbz = 0;
+			dbzD = 0;
 		else 
-			dbz = 1;
+			dbzD = 1;
 	end
 
 endmodule
 
-module MOD(inputA, inputB, remainder, dbz);
+module MOD(inputA, inputB, remainder, dbzM);
 	input [15:0] inputA,inputB;
 	output [31:0] remainder;
-	output dbz;
-	reg dbz;
+	output dbzM;
+	reg dbzM;
 	reg [31:0] remainder;
 
 	always @(*) begin
 		remainder = inputA%inputB;
 		if(inputB)
-			dbz = 0;
+			dbzM = 0;
 		else
-			dbz = 1;
+			dbzM = 1;
 	end
 endmodule
 
@@ -332,7 +332,10 @@ assign channels[15]=0;//GROUND=0
 
 always @(*)  
 begin
-	if (command == 4'b0001) begin
+
+	mode = ~command[3]&~command[2]&command[1]&~command[0];
+
+	if (command == 4'b0001) begin // Redefine the mode so that overflow error bits dont appear on div/mod modules
 		mode = 0;
 	end else begin
 		mode = 1;
@@ -356,13 +359,13 @@ module TestBench();
   reg [15:0] inputB;
   reg [3:0] command;
   wire [31:0] result;
-  wire [1:0]error;
+  wire [1:0] error;
   BreadBoard ALU(inputA,inputB,command,result,error);
   
   initial begin
     assign inputA  = 16'b0000000011111001;
 	assign inputB  = 16'b0000000001000101;
-	assign command =  1;
+	assign command = 1;
 
 	#10;
 	$display("[Input A:%6d, Input B:%6d][Add:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
