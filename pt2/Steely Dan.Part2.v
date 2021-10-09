@@ -197,11 +197,11 @@ module DIV(inputA,inputB,quotient,dbz);
 	reg [31:0] quotient;
 
 	always @(*) begin
-		if (inputB == 0) 
-			dbz = 1;
-		else 
-			quotient = inputA/inputB;
+		quotient = inputA/inputB;
+		if (inputB) 
 			dbz = 0;
+		else 
+			dbz = 1;
 	end
 
 endmodule
@@ -337,8 +337,14 @@ begin
 	end else begin
 		mode = 1;
 	end
+
+	if (command != 4'b0100 && command != 4'b0101) begin
+		error = {1'b0,overflow};
+	end else begin
+		error = {dbzD,overflow};
+	end
+
 	result=b;
-	error = {dbzD,overflow};
 end
 
 endmodule
