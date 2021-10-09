@@ -206,6 +206,22 @@ module DIV(inputA,inputB,quotient,dbz);
 
 endmodule
 
+module MOD(inputA, inputB, remainder, dbz);
+	input [15:0] inputA,inputB;
+	output [31:0] remainder;
+	output dbz;
+	reg dbz;
+	reg [31:0] remainder;
+
+	always @(*) begin
+		remainder = inputA%inputB;
+		if(inputB)
+			dbz = 0;
+		else
+			dbz = 1;
+	end
+endmodule
+
 module DEC(binary,onehot);
 	input [3:0] binary;
 	output [15:0]onehot;
@@ -280,6 +296,10 @@ wire [31:0] product;
 wire [31:0] quotient;
 wire dbzD;
 
+//Modulo
+wire [31:0] remainder;
+wire dbzM;
+
 //Multiplexer
 wire [15:0][31:0] channels;
 wire [15:0] onehotMux;
@@ -290,7 +310,7 @@ ADD_SUB add_sub(inputA,inputB,mode,sum,carry,overflow);
 MUX mux(channels,onehotMux,b);
 MULT mult(inputA,inputB,product);
 DIV div(inputA, inputB, quotient, dbzD);
-
+MOD mod(inputA, inputB, remainder, dbzM);
 
 
 assign channels[ 0]=0;//GROUND=0
@@ -298,7 +318,7 @@ assign channels[ 1]=sum;//Addition
 assign channels[ 2]=sum;//Subtraction
 assign channels[ 3]=product;//Multiplication
 assign channels[ 4]=quotient;//Division
-assign channels[ 5]=0;//mod;//Modulo
+assign channels[ 5]=remainder;//Modulo
 assign channels[ 6]=0;//GROUND=0
 assign channels[ 7]=0;//GROUND=0
 assign channels[ 8]=0;//GROUND=0
@@ -321,7 +341,7 @@ begin
 	if (command != 4'b0100 && command != 4'b0101) begin
 		error = {1'b0,overflow};
 	end else begin
-		error = {dbzD,overflow};
+		error = {dbzD|dbzM,overflow};
 	end
 
 	result=b;
@@ -361,6 +381,11 @@ module TestBench();
 	#10;
 
 	$display("[Input A:%6d, Input B:%6d][Div:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
+
+	assign command = 5;
+	#10;
+
+	$display("[Input A:%6d, Input B:%6d][Mod:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 	
 	assign inputA  = 16'b0111110100000000;
 	assign inputB  = 16'b0010000000000001;
@@ -383,6 +408,11 @@ module TestBench();
 	#10;
 
 	$display("[Input A:%6d, Input B:%6d][Div:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
+
+	assign command = 5;
+	#10;
+
+	$display("[Input A:%6d, Input B:%6d][Mod:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 
 	#60; 
 	$finish;
