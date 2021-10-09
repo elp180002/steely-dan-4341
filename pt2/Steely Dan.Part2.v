@@ -214,11 +214,11 @@ module MOD(inputA, inputB, remainder, dbz);
 	reg [31:0] remainder;
 
 	always @(*) begin
-		if(inputB == 0)
-			dbz = 1;
-		else
-			remainder = inputA%inputB;
+		remainder = inputA%inputB;
+		if(inputB)
 			dbz = 0;
+		else
+			dbz = 1;
 	end
 endmodule
 
@@ -341,7 +341,7 @@ begin
 	if (command != 4'b0100 && command != 4'b0101) begin
 		error = {1'b0,overflow};
 	end else begin
-		error = {dbzD,overflow};
+		error = {dbzD|dbzM,overflow};
 	end
 
 	result=b;
