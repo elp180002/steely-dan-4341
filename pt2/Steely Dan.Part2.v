@@ -388,7 +388,7 @@ module TestBench();
 	$display("[Input A:%6d, Input B:%6d][Mod:%b][Output:%10d, Error: %b]",inputA,inputB,command,result,error);
 	
 	assign inputA  = 16'b0111110100000000;
-	assign inputB  = 16'b0010000000000001;
+	assign inputB  = 16'b0011111010000001;
 	assign command =  1;
 	#10;
 
