@@ -335,17 +335,8 @@ assign channels[15]=0;//GROUND=0
 
 always @(*)  
 begin
-
 	mode = ~command[3]&~command[2]&command[1]&~command[0];
-
-	if (command == 4'b0100 || command == 4'b0101) begin // DIV or MOD
-		error = {dbzD|dbzM,1'b0};
-	end else if (command == 4'b0001 || command == 4'b0010) begin // ADD or SUB
-		error = {1'b0,overflow};
-	end else begin // MULT
-		error = {1'b0,1'b0};
-	end
-
+	error = {dbzD|dbzM,overflow};
 	result=b;
 end
 
