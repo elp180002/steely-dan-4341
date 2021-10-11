@@ -1,3 +1,6 @@
+// Cohort: Steely Dan
+// Code Authors: Ethan Peglar, Mark Austin Sandifer, Jack Li
+
 module HalfAdder(A,B,carry,sum);
 	input A;
 	input B;
@@ -335,16 +338,12 @@ begin
 
 	mode = ~command[3]&~command[2]&command[1]&~command[0];
 
-	if (command == 4'b0001) begin // Redefine the mode so that overflow error bits dont appear on div/mod modules
-		mode = 0;
-	end else begin
-		mode = 1;
-	end
-
-	if (command != 4'b0100 && command != 4'b0101) begin
+	if (command == 4'b0100 || command == 4'b0101) begin // DIV or MOD
+		error = {dbzD|dbzM,1'b0};
+	end else if (command == 4'b0001 || command == 4'b0010) begin // ADD or SUB
 		error = {1'b0,overflow};
-	end else begin
-		error = {dbzD|dbzM,overflow};
+	end else begin // MULT
+		error = {1'b0,1'b0};
 	end
 
 	result=b;
