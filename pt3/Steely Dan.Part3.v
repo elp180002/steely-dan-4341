@@ -461,10 +461,7 @@ assign feedback=outval[15:0];
 always @(*)  
 begin
 	mode = ~command[3]&~command[2]&command[1]&~command[0];
-	if (command == 4'b0100 || command == 4'b0101)
-		error = {dbzD|dbzM,overflow};
-	else
-		error = 2'b00;
+	error = {dbzD|dbzM,overflow};
 	result=b;
 end
 
