@@ -482,6 +482,8 @@ module TestBench();
   reg cherryLimeadeSupply = 100;
   reg fantaPineappleSupply = 100;
   reg smirnoffVodkaSupply = 100;
+  reg monsterLoCarbSupply = 100;
+  reg costcoBoxWine = 100;
   reg tigersBloodSupply = 100;
   reg chocolateSyrupSupply = 100;
   reg coffeeCreamerSupply = 100;
