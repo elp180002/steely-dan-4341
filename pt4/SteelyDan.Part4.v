@@ -471,10 +471,20 @@ module TestBench();
   reg clk;
   reg [15:0] inputA;
   reg [3:0] command;
-  reg [5:0] volume;
+  reg [4:0] volume;
   reg [10:0] drinks;
   wire [31:0] result;
   wire [1:0] error;
+  
+  reg cokeZeroSupply = 100;
+  reg dietDrPepperSupply = 100;
+  reg pibbXtraSupply = 100;
+  reg cherryLimeadeSupply = 100;
+  reg fantaPineappleSupply = 100;
+  reg smirnoffVodkaSupply = 100;
+  reg tigersBloodSupply = 100;
+  reg chocolateSyrupSupply = 100;
+  reg coffeeCreamerSupply = 100;
 
   BreadBoard ALU(clk,inputA,command,result,error);
   
@@ -492,68 +502,64 @@ initial begin
     
 	$display("\n=======================");
 	$display("Our state-of-the-art vending machine, [STEELY DAN], currently has 11 options to choose from, curated by the group:");
-	$display("1: Coca-Cola Zero         | 000000000001");
-	$display("2: Diet Dr. Pepper        | 000000000010");
-	$display("3: Pibb Xtra              | 000000000100");
-	$display("4: Cherry Limeade         | 000000001000");
-	$display("5: Fanta Pineapple        | 000000010000");
-	$display("6: Smirnoff Vodka         | 000000100000");
-	$display("7: Monster Energy Lo-Carb | 000001000000");
-	$display("8: Costco Box Wine        | 000100000000");
-	$display("9: Tiger's Blood          | 001000000000");
-	$display("10: Chocolate Syrup       | 010000000000");
-	$display("11: Coffee Creamer        | 100000000000\n");
+	$display("1: Coca-Cola Zero         | 00000000001");
+	$display("2: Diet Dr. Pepper        | 00000000010");
+	$display("3: Pibb Xtra              | 00000000100");
+	$display("4: Cherry Limeade         | 00000001000");
+	$display("5: Fanta Pineapple        | 00000010000");
+	$display("6: Smirnoff Vodka         | 00000100000");
+	$display("7: Monster Energy Lo-Carb | 00001000000");
+	$display("8: Costco Box Wine        | 00010000000");
+	$display("9: Tiger's Blood          | 00100000000");
+	$display("10: Chocolate Syrup       | 01000000000");
+	$display("11: Coffee Creamer        | 10000000000\n");
 	$display("The upper five bits will represent how much to dispense of each drink into the cup (input of 00010 00000100000 means 2 oz. of Vodka)");
 	$display("Steely Dan is not responsible for customers who (arithmetically or physically) overflow the 16 oz. cups.");
 
 	$display("\n=======================");
 	assign inputA=16'b0000000000000000;
 	assign command=4'b0110;
-	#10;
-	if(error[0] == 1) $display("\nCup overflow!\n=======================");
-	if(result[15] && (result[14]||result[13]||result[12]||result[11])) $finish;
+	#10; // RESET
 
-	assign inputA=16'b0100000000000001;
+	assign inputA=16'b1000000000000001;
 	assign command=4'b0001;
-	#10
-	$display("Add 8 oz. of Coca-Cola Zero");
-	if(result[15] && (result[14]||result[13]||result[12]||result[11])) $display("\nCup overflow!\n=======================");
-	if(result[15] && (result[14]||result[13]||result[12]||result[11])) $finish;
-	
-	assign inputA=16'b0000100000000010;	
-	assign command=4'b0001;
-	#10
-	$display("Add 1 oz. of Diet Dr. Pepper");
-	if(result[15] && (result[14]||result[13]||result[12]||result[11])) $display("\nCup overflow!\n=======================");
-	if(result[15] && (result[14]||result[13]||result[12]||result[11])) $finish;
+	#10; // Add 16 oz. of Coca-Cola Zero
 
 	assign volume = result[15:11];
 	assign drinks = result[10:0];
-	#10
 
-	$display("=======================");
-	$display("\nDispensing...");
-	$display("Drinks: %11b", drinks);
-	$display("Final Volume:        %d oz.", volume);
+	case (drinks)
+		11'b00000000001: $display("Dispensing %d oz. of Coca-Cola Zero...", volume);
+		11'b00000000010: $display("Dispensing %d oz. of Diet Dr. Pepper...", volume);
+		11'b00000000100: $display("Dispensing %d oz. of Pibb Xtra...", volume);
+		11'b00000001000: $display("Dispensing %d oz. of Cherry Limeade...", volume);
+		11'b00000010000: $display("Dispensing %d oz. of Fanta Pineapple...", volume);
+		11'b00000100000: $display("Dispensing %d oz. of Smirnoff Vodka...", volume);
+		11'b00001000000: $display("Dispensing %d oz. of Monster Energy Lo-Carb...", volume);
+		11'b00010000000: $display("Dispensing %d oz. of Costco Box Wine...", volume);
+		11'b00100000000: $display("Dispensing %d oz. of Tiger's Blood...", volume);
+		11'b01000000000: $display("Dispensing %d oz. of Chocolate Syrup...", volume);
+		11'b10000000000: $display("Dispensing %d oz. of Coffee Creamer...", volume);
+	endcase
 
+	assign inputA=16'b0000000000000000;
 	assign command=4'b0110;
-	#10 // RESET
+	#10; // RESET
 
 	assign inputA=volume;
 	assign command=4'b0001;
-	#10 // ADD volume
+	#10; // Add volume to feedback
 
-	assign inputA=4'b0010;
-	assign command=4'b0011;
-	#10 // MULT by 2 (to tablespoons)
+	while (volume != 0) begin
+		assign inputA=16'b0000000000000001;
+		assign command=4'b0010;
+		assign volume=result;
+		#10
 
-	$display("              %d tablespoons", result);
+		$display("%d oz. left to dispense...", volume);
+	end
 
-	assign inputA=4'b0011;
-	assign command=4'b0011;
-	#10 // MULT by 3 (to teaspoons)
-
-	$display("              %d teaspoons\n", result);
+	$display("Done!");
 
 	$finish;
   end  
