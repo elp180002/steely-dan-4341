@@ -471,8 +471,9 @@ module TestBench();
   reg clk;
   reg [15:0] inputA;
   reg [3:0] command;
-  reg [4:0] volume;
+  reg [4:0] timeDisp;
   reg [10:0] drinks;
+  reg [15:0] volume;
   wire [31:0] result;
   wire [1:0] error;
   
@@ -519,49 +520,68 @@ initial begin
 	$display("Steely Dan is not responsible for customers who (arithmetically or physically) overflow the 16 oz. cups.");
 
 	$display("\n=======================");
+
 	assign inputA=16'b0000000000000000;
 	assign command=4'b0110;
 	#10; // RESET
 
 	assign inputA=16'b1000000000000001;
 	assign command=4'b0001;
-	#10; // Add 16 oz. of Coca-Cola Zero
+	#10; // Add Coca-Cola Zero for 1 seconds
 
-	assign volume = result[15:11];
+	assign timeDisp = result[15:11];
 	assign drinks = result[10:0];
 
 	case (drinks)
-		11'b00000000001: $display("Dispensing %d oz. of Coca-Cola Zero...", volume);
-		11'b00000000010: $display("Dispensing %d oz. of Diet Dr. Pepper...", volume);
-		11'b00000000100: $display("Dispensing %d oz. of Pibb Xtra...", volume);
-		11'b00000001000: $display("Dispensing %d oz. of Cherry Limeade...", volume);
-		11'b00000010000: $display("Dispensing %d oz. of Fanta Pineapple...", volume);
-		11'b00000100000: $display("Dispensing %d oz. of Smirnoff Vodka...", volume);
-		11'b00001000000: $display("Dispensing %d oz. of Monster Energy Lo-Carb...", volume);
-		11'b00010000000: $display("Dispensing %d oz. of Costco Box Wine...", volume);
-		11'b00100000000: $display("Dispensing %d oz. of Tiger's Blood...", volume);
-		11'b01000000000: $display("Dispensing %d oz. of Chocolate Syrup...", volume);
-		11'b10000000000: $display("Dispensing %d oz. of Coffee Creamer...", volume);
+		11'b00000000001: $display("Dispensing Coca-Cola Zero for %d seconds...", timeDisp);
+		11'b00000000010: $display("Dispensing Diet Dr. Pepper for %d seconds...", timeDisp);
+		11'b00000000100: $display("Dispensing Pibb Xtra for %d seconds...", timeDisp);
+		11'b00000001000: $display("Dispensing Cherry Limeade for %d seconds...", timeDisp);
+		11'b00000010000: $display("Dispensing Fanta Pineapple for %d seconds...", timeDisp);
+		11'b00000100000: $display("Dispensing Smirnoff Vodka for %d seconds...", timeDisp);
+		11'b00001000000: $display("Dispensing Monster Energy Lo-Carb for %d seconds...", timeDisp);
+		11'b00010000000: $display("Dispensing Costco Box Wine for %d seconds...", timeDisp);
+		11'b00100000000: $display("Dispensing Tiger's Blood for %d seconds...", timeDisp);
+		11'b01000000000: $display("Dispensing Chocolate Syrup for %d seconds...", timeDisp);
+		11'b10000000000: $display("Dispensing Coffee Creamer for %d seconds...", timeDisp);
 	endcase
 
 	assign inputA=16'b0000000000000000;
 	assign command=4'b0110;
 	#10; // RESET
 
-	assign inputA=volume;
+	assign inputA=timeDisp;
 	assign command=4'b0001;
-	#10; // Add volume to feedback
+	#10; // Add time to feedback
 
-	while (volume != 0) begin
+	while (result != 0) begin
 		assign inputA=16'b0000000000000001;
 		assign command=4'b0010;
-		assign volume=result;
-		#10
+		#10 // timer to dispense drink
 
-		$display("%d oz. left to dispense...", volume);
+		$display("%d seconds left...", result);
 	end
 
+	// The machine will dispense a roughly 1x1 inch (wide and tall) rectangular prism at a rate of 7 inches per second.
+	// Therefore, 1 second of dispensing will equate to 7 cubic inches of drink, or ~4 fluid ounces.
+	// As per the rubric requirements, we must calculate how much soda was dispensed, and subtract it from out supply.
+
+	assign inputA=16'b0000000000000000;
+	assign command=4'b0110;
+	#10; // RESET
+
+	assign inputA=timeDisp;
+	assign command=4'b0001;
+	#10; // Add time to feedback
+
+	assign inputA=16'b0000000000000111;
+	assign command=4'b0011;
+	assign volume=result;
+	#10; // Multiply speed by time to get volume
 	$display("Done!");
+	$display("Dispensed %d oz.\n", volume);
+
+	
 
 	$finish;
   end  
