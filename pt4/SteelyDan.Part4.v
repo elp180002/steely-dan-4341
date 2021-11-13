@@ -577,11 +577,23 @@ initial begin
 	assign inputA=16'b0000000000000111;
 	assign command=4'b0011;
 	assign volume=result;
-	#10; // Multiply speed by time to get volume
-	$display("Done!");
+	#10; // Multiply speed by time to get volume (cubic inches)
+
+	$display("Dispensed %d cubic inches.", volume);
+
+
+	assign inputA=16'b0000000000000100;
+	assign command=4'b0011;
+	assign volume=result;
+	#10; // Multiply times 4
+
+	assign inputA=16'b0000000000000111;
+	assign command=4'b0100;
+	assign volume=result;
+	#10; // Divide by 7
+
 	$display("Dispensed %d oz.\n", volume);
 
-	
 
 	$finish;
   end  
